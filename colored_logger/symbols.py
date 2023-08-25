@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+# NOTE: unicode source https://www.w3.org/TR/xml-entity-names/025.html
+ENDCAPS = {
+    "left-triangle-filled": "\u25c0",
+    "left-triangle": "\u25c1",
+    "right-triangle": "\u25b7",
+    "right-triangle-filled": "\u25b6",
+    "square": "\u25a1",
+    "square-filled": "\u25a0",
+    "square-inverse": "\u25a3",
+    "diamond": "\u25c7",
+    "diamond-filled": "\u25c6",
+    "diamond-inverse": "\u25c8",
+    "full-block": "\u2588",
+    "bullet-inverse": "\u25d9",
+    "circle-inverse": "\u25d9",
+}
+CONNECTORS = {
+    "single": {
+        "down-and-right": "\u250c",
+        "down-and-left": "\u2510",
+        "vertical": "\u2502",
+        "vertical-and-left": "\u2524",
+        "vertical-and-right": "\u251c",
+        "up-and-right": "\u2514",
+        "up-and-left": "\u2518",
+        "cross": "\u253c",
+        "t-junction-up": "\u2534",
+        "t-junction-down": "\u252c",
+        "horizontal": "\u2500",
+    },
+    "double": {
+        "down-and-right": "\u2554",
+        "down-and-left": "\u2557",
+        "vertical": "\u2551",
+        "vertical-and-left": "\u2563",
+        "vertical-and-right": "\u2560",
+        "up-and-right": "\u255a",
+        "up-and-left": "\u255d",
+        "cross": "\u256c",
+        "t-junction-up": "\u2569",
+        "t-junction-down": "\u2566",
+        "horizontal": "\u2550",
+    },
+}
