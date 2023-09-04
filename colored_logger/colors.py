@@ -1,24 +1,49 @@
 #!/usr/bin/env python3
 
-RESET = "\x1b[0m"  # reset
+# NOTE: These are octal color codes are compatible with bash!
+# https://stackoverflow.com/a/28938235
 
-BLACK = "\x1b[30m"  # foreground black
-RED = "\x1b[31m"  # foreground red
-GREEN = "\x1b[32m"  # foreground green
-YELLOW = "\x1b[33m"  # foreground yellow
-BLUE = "\x1b[34m"  # foreground blue
-MAGENTA = "\x1b[35m"  # foreground magenta
-CYAN = "\x1b[36m"  # foreground cyan
-WHITE = "\x1b[37m"  # foreground white
+RESET = "\033[0m"  # RESET all color codes with this
 
-BLACK_BG = "\x1b[40m"  # bg black
-RED_BG = "\x1b[41m"  # bg red
-GREEN_BG = "\x1b[42m"  # bg green
-YELLOW_BG = "\x1b[43m"  # bg yellow
-BLUE_BG = "\x1b[44m"  # bg blue
-MAGENTA_BG = "\x1b[45m"  # bg magenta
-CYAN_BG = "\x1b[46m"  # bg cyan
-WHITE_BG = "\x1b[47m"  # bg white
+# NOTE: Foreground
+BLACK = "\033[0;30m"  # BLACK
+RED = "\033[0;31m"  # RED
+GREEN = "\033[0;32m"  # GREEN
+YELLOW = "\033[0;33m"  # YELLOW
+BLUE = "\033[0;34m"  # BLUE
+MAGENTA = "\033[0;35m"  # PURPLE
+CYAN = "\033[0;36m"  # CYAN
+WHITE = "\033[0;37m"  # WHITE
+
+# NOTE: BOLD
+BLACK_BOLD = "\033[1;30m"  # BLACK
+RED_BOLD = "\033[1;31m"  # RED
+GREEN_BOLD = "\033[1;32m"  # GREEN
+YELLOW_BOLD = "\033[1;33m"  # YELLOW
+BLUE_BOLD = "\033[1;34m"  # BLUE
+MAGENTA_BOLD = "\033[1;35m"  # PURPLE
+CYAN_BOLD = "\033[1;3m"  # CYAN
+WHITE_BOLD = "\033[1;37m"  # WHITE
+
+# NOTE: UNDERLINE
+BLACK_U = "\033[4;30m"  # BLACK
+RED_U = "\033[4;31m"  # RED
+GREEN_U = "\033[4;32m"  # GREEN
+YELLOW_U = "\033[4;33m"  # YELLOW
+BLUE_U = "\033[4;34m"  # BLUE
+MAGENTA_U = "\033[4;35m"  # PURPLE
+CYAN_U = "\033[4;36m"  # CYAN
+WHITE_U = "\033[4;37m"  # WHITE
+
+# NOTE: BACKGROUND
+BLACK_BG = "\033[40m"  # BLACK
+RED_BG = "\033[41m"  # RED
+GREEN_BG = "\033[42m"  # GREEN
+YELLOW_BG = "\033[43m"  # YELLOW
+BLUE_BG = "\033[44m"  # BLUE
+MAGENTA_BG = "\033[45m"  # PURPLE
+CYAN_BG = "\033[46m"  # CYAN
+WHITE_BG = "\033[47m"  # WHITE
 
 FOREGROUND_COLORS = {
     "": RESET,
@@ -54,3 +79,35 @@ COLORS = {
     "CYAN-BG": CYAN_BG,
     "WHITE-BG": WHITE_BG,
 }
+
+
+# TODO: change naming scheme
+# HIGH INTENSITY
+IBLACK = "\033[0;90m"  # BLACK
+IRED = "\033[0;91m"  # RED
+IGREEN = "\033[0;92m"  # GREEN
+IYELLOW = "\033[0;93m"  # YELLOW
+IBLUE = "\033[0;94m"  # BLUE
+IMAGENTA = "\033[0;95m"  # PURPLE
+ICYAN = "\033[0;96m"  # CYAN
+IWHITE = "\033[0;97m"  # WHITE
+
+# BOLD HIGH INTENSITY
+BIBLACK = "\033[1;90m"  # BLACK
+BIRED = "\033[1;91m"  # RED
+BIGREEN = "\033[1;92m"  # GREEN
+BIYELLOW = "\033[1;93m"  # YELLOW
+BIBLUE = "\033[1;94m"  # BLUE
+BIMAGENTA = "\033[1;95m"  # PURPLE
+BICYAN = "\033[1;96m"  # CYAN
+BIWHITE = "\033[1;97m"  # WHITE
+
+# HIGH INTENSITY BACKGROUNDS
+ON_IBLACK = "\033[0;100m"  # BLACK
+ON_IRED = "\033[0;101m"  # RED
+ON_IGREEN = "\033[0;102m"  # GREEN
+ON_IYELLOW = "\033[0;103m"  # YELLOW
+ON_IBLUE = "\033[0;104m"  # BLUE
+ON_IMAGENTA = "\033[0;105m"  # PURPLE
+ON_ICYAN = "\033[0;106m"  # CYAN
+On_IWHITE = "\033[0;107m"  # White

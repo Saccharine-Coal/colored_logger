@@ -1,24 +1,15 @@
 from __future__ import annotations
 import logging
+import datetime
 
 import colored_logger.colors as colors
 import colored_logger.symbols as symbols
 
 
 class CustomFormatter(logging.Formatter):
-    RESET = "\x1b[0m"  # reset
-    BLACK = "\x1b[30m"  # foreground black
-    RED = "\x1b[31m"  # foreground red
-    GREEN = "\x1b[32m"  # foreground green
-    YELLOW = "\x1b[33m"  # foreground yellow
-    BLUE = "\x1b[34m"  # foreground blue
-    MAGENTA = "\x1b[35m"  # foreground magenta
-    CYAN = "\x1b[36m"  # foreground cyan
-    WHITE = "\x1b[37m"  # foreground white
-
     def __init__(
         self,
-        name,
+        name: str = __name__,
         print_colors=False,
         endcap="triangle-filled",
         print_arrows=False,
@@ -26,9 +17,10 @@ class CustomFormatter(logging.Formatter):
         print_dict=False,
         level: str = "WARN",
         shortend_names=True,
+        datefmt="%Y-%m-%d %H:%H:%S",
         **formatter_kwargs,
     ):
-        super().__init__(**formatter_kwargs)
+        super().__init__(datefmt=datefmt, **formatter_kwargs)
         # https://www.w3.org/TR/xml-entity-names/025.html
         self.STR_TO_COLOR = colors.COLORS
         self.INT_TO_STR: dict[int, str] = {
@@ -69,20 +61,20 @@ class CustomFormatter(logging.Formatter):
         self.msg_length = 6
         self.msg_hspace = 1
         self.msg_tab = self.msg_length + 1 + self.msg_hspace
-        self.num_tabs = 15
+        self.num_tabs = 10
         if print_colors:
-            print("BLACK:\t\t" + self.BLACK + "HELLO" + self.RESET)
-            print("RED:\t\t" + self.RED + "HELLO" + self.RESET)
-            print("GREEN:\t\t" + self.GREEN + "HELLO" + self.RESET)
-            print("YELLOW:\t\t" + self.YELLOW + "HELLO" + self.RESET)
-            print("BLUE:\t\t" + self.BLUE + "HELLO" + self.RESET)
-            print("MAGENTA:\t" + self.MAGENTA + "HELLO" + self.RESET)
-            print("CYAN:\t\t" + self.CYAN + "HELLO" + self.RESET)
-            print("WHITE:\t\t" + self.WHITE + "HELLO" + self.RESET)
+            print("BLACK:\t\t" + colors.BLACK + "HELLO" + colors.RESET)
+            print("RED:\t\t" + colors.RED + "HELLO" + colors.RESET)
+            print("GREEN:\t\t" + colors.GREEN + "HELLO" + colors.RESET)
+            print("YELLOW:\t\t" + colors.YELLOW + "HELLO" + colors.RESET)
+            print("BLUE:\t\t" + colors.BLUE + "HELLO" + colors.RESET)
+            print("MAGENTA:\t" + colors.MAGENTA + "HELLO" + colors.RESET)
+            print("CYAN:\t\t" + colors.CYAN + "HELLO" + colors.RESET)
+            print("WHITE:\t\t" + colors.WHITE + "HELLO" + colors.RESET)
         if print_arrows:
             print(self.connector_color + "\u2560\u2550\u25b6")
             print("\u2560\u2550\u25b7")
-            print("\u2560\u2550\u25c7" + self.RESET)
+            print("\u2560\u2550\u25c7" + colors.RESET)
         if print_dict:
             print(self.ENDCAPS)
             print(self.CONNECTORS)
@@ -94,12 +86,16 @@ class CustomFormatter(logging.Formatter):
                 "BLUE-BG": "\x1b[44m",  # foreground blue
                 "MAGENTA-BG": "\x1b[45m",  # foreground magenta
                 "CYAN-BG": "\x1b[46m",  # foreground cyan
-                "WHITE-BG": "\x1b[47m",  # foreground whit
+                "WHITE-BG": "\x1b[47m",  # foreground white
             }
             for key in bg.keys():
-                print(bg[key] + self.BLACK + f"  {key}  ", self.RESET)
-        print(self.STR_TO_COLOR["CYAN-BG"] + self.BLACK + f" {name} " + self.RESET)
-        print(symbols.CONNECTORS[self.connector]["vertical"])
+                print(bg[key] + colors.BLACK + f"  {key}  ", colors.RESET)
+        print(colors.BLACK + self.STR_TO_COLOR["CYAN-BG"] + f" {name} " + colors.RESET)
+        print(
+            self.connector_color
+            + symbols.CONNECTORS[self.connector]["vertical"]
+            + colors.RESET
+        )
 
     def _get_endcap(self, right=True) -> str:
         fmt = ""
@@ -118,13 +114,17 @@ class CustomFormatter(logging.Formatter):
     def _get_arrow(self, length=1, right=True, endcap_color="") -> str:
         connectors = self.CONNECTORS[self.connector]
         fmt = self.connector_color
-        fmt += connectors["vertical-and-right"]
-        fmt += connectors["horizontal"] * length
+        if self.connector_color == colors.RESET:
+            connector = " "
+        else:
+            fmt += connectors["vertical-and-right"]
+            connector = connectors["horizontal"]
+        fmt += connector * length
         # fmt += (
         #     self.STR_TO_COLOR[endcap_color.upper()] if endcap_color else ""
         # ) + self._get_endcap(right=right)
         fmt += endcap_color + self._get_endcap(right=right)
-        fmt += self.RESET
+        fmt += colors.RESET
         return fmt
 
     def _get_color(self, input, bg=False) -> str:
@@ -142,16 +142,16 @@ class CustomFormatter(logging.Formatter):
             return as_color_code(input, bg)
 
     def _get_format(self, levelno: int) -> str:
-        level_fmt = f"{self._get_arrow(length=0, right=False, endcap_color=self._get_color(levelno))}{self._get_color(levelno, bg=levelno == logging.CRITICAL)}%(levelname)s{self.RESET}:"
+        level_fmt = f"{self._get_arrow(length=0, right=False, endcap_color=self._get_color(levelno))}{self._get_color(levelno, bg=levelno == logging.CRITICAL)}%(levelname)s{colors.RESET}:"
         header_fmt = (
             ("\t" * self.num_tabs)
-            + f"{self.RESET}{self.CYAN}%(module)s.%(funcName)s():%(lineno)d{self.RESET}\n"
+            + f"{colors.RESET}{colors.CYAN}%(module)s.%(funcName)s():%(lineno)d{self.connector_color} {colors.WHITE}%(asctime)s\n{colors.RESET}"
         )
 
         connector_fmt = self._get_arrow(
             length=self.msg_length, endcap_color=self._get_color(levelno)
         )
-        message_fmt = "%(message)s" + self.RESET
+        message_fmt = "%(message)s" + colors.RESET
         NAME = ""
         FORMATS: dict[int, str] = {
             logging.DEBUG: header_fmt + connector_fmt + message_fmt,
@@ -180,7 +180,7 @@ class CustomFormatter(logging.Formatter):
 
     def format(self, record):
         log_fmt = self._get_format(record.levelno)
-        formatter = logging.Formatter(log_fmt)
+        formatter = logging.Formatter(log_fmt, datefmt=self.datefmt)
         if "\n" in record.msg:  # insert decorations to message
             msg = ""
             for i, line in enumerate(record.msg.splitlines()):
@@ -189,7 +189,7 @@ class CustomFormatter(logging.Formatter):
                         "\n"
                         + self.connector_color
                         + self.CONNECTORS[self.connector]["vertical"]
-                        + self.RESET
+                        + colors.RESET
                         + " " * self.msg_tab
                     )
                 msg += line
@@ -199,8 +199,23 @@ class CustomFormatter(logging.Formatter):
             fmt = fmt.replace(".<module>()", "")
         return fmt
 
+        # print("CALLED")
+        # datefmt = self.datefmt
+        # print(datefmt)
+        # # ) = lambda self, record, datefmt=None:
+        # if datefmt:
+        #     return datetime.datetime.utcfromtimestamp(record.created).strftime(datefmt)
+        # else:
+        #     return datetime.datetime.utcfromtimestamp(record.created).isoformat(
+        #         sep="_", timespec="microseconds"
+        #     )
 
-def get_logger(formatter: CustomFormatter) -> logging.Logger:
+
+def get_logger(formatter: CustomFormatter, config: dict = {}) -> logging.Logger:
+    if not isinstance(formatter, logging.Formatter):
+        raise TypeError(
+            f"Formatter must be of type logging.Formatter not {type(formatter)}."
+        )
     name, level = formatter.name, formatter.level
     logger = logging.getLogger(name)
     logger.setLevel(level)
@@ -208,4 +223,5 @@ def get_logger(formatter: CustomFormatter) -> logging.Logger:
     ch.setLevel(level)
     ch.setFormatter(formatter)
     logger.addHandler(ch)
+    logger.debug("Logging Configuration Complete!")
     return logger
