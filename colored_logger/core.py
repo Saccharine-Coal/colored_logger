@@ -126,41 +126,26 @@ class CustomFormatter(logging.Formatter):
             return as_color_code(input, bg)
 
     def _get_format(self, levelno: int) -> str:
-        level_fmt = f"{self._get_arrow(length=0, right=False, endcap_color=self._get_color(levelno))}{self._get_color(levelno, bg=levelno == logging.CRITICAL)}%(levelname)s{colors.RESET}:"
-        header_fmt = (
-            ("\t" * self.num_tabs)
-            + f"{colors.RESET}{colors.CYAN}%(module)s.%(funcName)s():%(lineno)d{self.connector_color} {colors.WHITE}%(asctime)s\n{colors.RESET}"
-        )
-
+        """Get format string for logger with color codes and symbols inserted."""
+        start_cap = self._get_arrow(
+            length=0, right=False, endcap_color=self._get_color(levelno)
+        ) + self._get_color(levelno, bg=levelno == logging.CRITICAL)
+        level_fmt = f"{start_cap}%(levelname)s{colors.RESET}:"
+        white_space = "\t" * self.num_tabs
+        module_fmt = f"{colors.CYAN}%(module)s.%(funcName)s():%(lineno)d{colors.RESET} "
+        time_fmt = f"{colors.WHITE}%(asctime)s{colors.RESET}\n"
         connector_fmt = self._get_arrow(
             length=self.msg_length, endcap_color=self._get_color(levelno)
         )
-        message_fmt = "%(message)s" + colors.RESET
-        NAME = ""
-        FORMATS: dict[int, str] = {
-            logging.DEBUG: header_fmt + connector_fmt + message_fmt,
-            logging.INFO: NAME
-            + self._get_color(levelno)
-            + header_fmt
+        message_fmt = f"%(message)s{colors.RESET}"
+        return (
+            level_fmt
+            + white_space
+            + module_fmt
+            + time_fmt
             + connector_fmt
-            + message_fmt,
-            logging.WARNING: NAME
-            + self._get_color(levelno)
-            + header_fmt
-            + connector_fmt
-            + message_fmt,
-            logging.ERROR: NAME
-            + self._get_color(levelno)
-            + header_fmt
-            + connector_fmt
-            + message_fmt,
-            logging.CRITICAL: NAME
-            + self._get_color(levelno)
-            + header_fmt
-            + connector_fmt
-            + message_fmt,
-        }
-        return level_fmt + FORMATS[levelno]
+            + message_fmt
+        )
 
     def format(self, record):
         log_fmt = self._get_format(record.levelno)
