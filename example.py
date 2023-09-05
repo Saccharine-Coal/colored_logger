@@ -3,6 +3,7 @@
 import colored_logger.colors
 import colored_logger.core
 import colored_logger.symbols
+import colored_logger.colors as colors
 
 formatter = colored_logger.core.CustomFormatter(
     "Example", level="DEBUG", connector_color="WHITE"
@@ -15,6 +16,11 @@ for key, value in colored_logger.colors.FOREGROUND_COLORS.items():
     log.debug(f"FOREGROUND: key={key}, {value}<|##|>{colored_logger.colors.RESET}")
 for key, value in colored_logger.colors.BACKGROUND_COLORS.items():
     log.info(f"BACKGROUND: key={key}, {value}<|##|>{colored_logger.colors.RESET}")
+for key, value in colored_logger.symbols.ENDCAPS.items():
+    log.info(f"ENDCAPS: key={key}, {value}")
+for key, dict in colored_logger.symbols.CONNECTORS.items():
+    for subkey, value in dict.items():
+        log.info(f"CONNECTORS: key={key}, subkey={subkey}, {value}")
 
 log.warning("Warning")
 log.error("Error")
