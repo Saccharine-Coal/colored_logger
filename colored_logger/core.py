@@ -6,6 +6,8 @@ import logging
 from . import colors
 from . import symbols
 
+_FORMATTER = None
+
 
 class CustomFormatter(logging.Formatter):
     def __init__(
@@ -57,7 +59,7 @@ class CustomFormatter(logging.Formatter):
     def _print_init(self) -> None:
         """Print init with formatter name"""
         print(colors.BLACK + colors.COLORS["CYAN-BG"] + f" {self.name} " + colors.RESET)
-        if self.connector_color:
+        if self.connector_color != colors.RESET:
             print(
                 self.connector_color
                 + symbols.CONNECTORS[self.connector]["vertical"]
@@ -171,10 +173,8 @@ class CustomFormatter(logging.Formatter):
         return fmt
 
 
-_FORMATTER = None
-
-
 def set_formatter(formatter: CustomFormatter) -> None:
+    global _FORMATTER
     if not isinstance(formatter, logging.Formatter):
         raise TypeError(
             f"Formatter must be of type logging.Formatter not {type(formatter)}."
@@ -184,6 +184,7 @@ def set_formatter(formatter: CustomFormatter) -> None:
 
 
 def get_logger() -> logging.Logger:
+    global _FORMATTER
     if isinstance(_FORMATTER, CustomFormatter):
         name, level = _FORMATTER.name, _FORMATTER.level
         logger = logging.getLogger(name)
