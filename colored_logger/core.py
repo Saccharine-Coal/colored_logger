@@ -1,8 +1,8 @@
 from __future__ import annotations
 import logging
 
-import colored_logger.colors as colors
-import colored_logger.symbols as symbols
+from . import colors
+from . import symbols
 
 
 class CustomFormatter(logging.Formatter):
@@ -169,17 +169,28 @@ class CustomFormatter(logging.Formatter):
         return fmt
 
 
-def get_logger(formatter: CustomFormatter, config: dict = {}) -> logging.Logger:
+_FORMATTER = None
+
+
+def set_formatter(formatter: CustomFormatter) -> None:
     if not isinstance(formatter, logging.Formatter):
         raise TypeError(
             f"Formatter must be of type logging.Formatter not {type(formatter)}."
         )
-    name, level = formatter.name, formatter.level
-    logger = logging.getLogger(name)
-    logger.setLevel(level)
-    ch = logging.StreamHandler()
-    ch.setLevel(level)
-    ch.setFormatter(formatter)
-    logger.addHandler(ch)
-    logger.debug("Logging Configuration Complete!")
-    return logger
+    _FORMATTER = formatter
+    return
+
+
+def get_logger() -> logging.Logger:
+    if isinstance(_FORMATTER, CustomFormatter):
+        name, level = _FORMATTER.name, _FORMATTER.level
+        logger = logging.getLogger(name)
+        logger.setLevel(level)
+        ch = logging.StreamHandler()
+        ch.setLevel(level)
+        ch.setFormatter(_FORMATTER)
+        logger.addHandler(ch)
+        logger.debug("Logging Configuration Complete!")
+        return logger
+    else:
+        raise ValueError("Formatter has not been set!")
