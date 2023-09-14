@@ -172,13 +172,13 @@ class CustomFormatter(logging.Formatter):
 _FORMATTER = None
 
 
-def set_formatter(formatter: CustomFormatter) -> None:
+def set_formatter(formatter: CustomFormatter) -> CustomFormatter:
     if not isinstance(formatter, logging.Formatter):
         raise TypeError(
             f"Formatter must be of type logging.Formatter not {type(formatter)}."
         )
     _FORMATTER = formatter
-    return
+    return _FORMATTER
 
 
 def get_logger() -> logging.Logger:
