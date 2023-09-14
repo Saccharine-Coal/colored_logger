@@ -1,6 +1,8 @@
 from __future__ import annotations
 import logging
 
+# import colored_logger.colors as colors
+# import colored_logger.symbols as symbols
 from . import colors
 from . import symbols
 
@@ -172,13 +174,13 @@ class CustomFormatter(logging.Formatter):
 _FORMATTER = None
 
 
-def set_formatter(formatter: CustomFormatter) -> CustomFormatter:
+def set_formatter(formatter: CustomFormatter) -> None:
     if not isinstance(formatter, logging.Formatter):
         raise TypeError(
             f"Formatter must be of type logging.Formatter not {type(formatter)}."
         )
     _FORMATTER = formatter
-    return _FORMATTER
+    return
 
 
 def get_logger() -> logging.Logger:
