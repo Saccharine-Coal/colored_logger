@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
+import logging
 
 import colored_logger.colors
 import colored_logger.core
 import colored_logger.symbols
 import colored_logger.colors as colors
 
-formatter = colored_logger.core.CustomFormatter(
-    "Example", level="DEBUG", connector_color="WHITE"
+colored_logger.set_formatter(
+    colored_logger.CustomFormatter(
+        name="Example", level="DEBUG", connector_color="WHITE"
+    )
 )
-log = colored_logger.core.get_logger(formatter)
+log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
 
 for key, value in colored_logger.colors.FOREGROUND_COLORS.items():
     if key == "BLACK":

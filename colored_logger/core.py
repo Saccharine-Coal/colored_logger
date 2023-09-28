@@ -6,13 +6,23 @@ import logging
 from . import colors
 from . import symbols
 
-_FORMATTER = None
-
 
 class CustomFormatter(logging.Formatter):
+    ID = (
+        "colored_logger"
+    )  # NOTE: use this for global logger use. Either get_logger() or logging.getLogger("colored_logger")
+    INT_TO_STR: dict[int, str] = {
+        0: "",
+        logging.DEBUG: "MAGENTA",
+        logging.INFO: "GREEN",
+        logging.WARNING: "YELLOW",
+        logging.ERROR: "RED",
+        logging.CRITICAL: "RED",
+    }
+
     def __init__(
         self,
-        name: str = __name__,
+        name: str = "main",
         startcap="square-filled",
         endcap: str = "triangle-filled",
         connector: str = "double",
@@ -22,7 +32,7 @@ class CustomFormatter(logging.Formatter):
         msg_hspace: int = 1,
         num_tabs=10,
         shortend_names: bool = True,
-        datefmt: str = "%Y-%m-%d %H:%H:%S",
+        datefmt: str = "%H:%H:%S",
         **formatter_kwargs,
     ):
         # NOTE: init arguments
@@ -40,15 +50,6 @@ class CustomFormatter(logging.Formatter):
         self.connector = connector
         self.connector_color = colors.COLORS[connector_color.upper()]
         self.shortend_names = shortend_names
-        # NOTE: constants
-        self.INT_TO_STR: dict[int, str] = {
-            0: "",
-            logging.DEBUG: "MAGENTA",
-            logging.INFO: "GREEN",
-            logging.WARNING: "YELLOW",
-            logging.ERROR: "RED",
-            logging.CRITICAL: "RED",
-        }
         # NOTE: assign variables from given arguments
         self.msg_tab = self.msg_length + 1 + self.msg_hspace
         super().__init__(datefmt=datefmt, **formatter_kwargs)
@@ -136,8 +137,8 @@ class CustomFormatter(logging.Formatter):
         ) + self._get_color(levelno, bg=levelno == logging.CRITICAL)
         level_fmt = f"{start_cap}%(levelname)s{colors.RESET}:"
         white_space = "\t" * self.num_tabs
-        module_fmt = f"{colors.CYAN}%(module)s.%(funcName)s():%(lineno)d{colors.RESET} "
-        time_fmt = f"{colors.WHITE}%(asctime)s{colors.RESET}\n"
+        module_fmt = f"{colors.CYAN}%(module)s.%(funcName)s():%(lineno)s{colors.RESET}"
+        time_fmt = f"{colors.WHITE}%(asctime)s{colors.RESET}"
         connector_fmt = self._get_arrow(
             length=self.msg_length, endcap_color=self._get_color(levelno)
         )
@@ -145,8 +146,10 @@ class CustomFormatter(logging.Formatter):
         return (
             level_fmt
             + white_space
-            + module_fmt
             + time_fmt
+            + " "
+            + module_fmt
+            + "\n"
             + connector_fmt
             + message_fmt
         )
@@ -168,32 +171,20 @@ class CustomFormatter(logging.Formatter):
                 msg += line
             record.msg = msg
         fmt = formatter.format(record)
-        if "<module>()" in fmt:  # remove <module>
-            fmt = fmt.replace(".<module>()", "")
+        # if "<module>()" in fmt:  # remove <module>
+        #     fmt = fmt.replace(".<module>()", "")
         return fmt
 
 
 def set_formatter(formatter: CustomFormatter) -> None:
-    global _FORMATTER
-    if not isinstance(formatter, logging.Formatter):
+    if not isinstance(formatter, CustomFormatter):
         raise TypeError(
-            f"Formatter must be of type logging.Formatter not {type(formatter)}."
+            f"Formatter must be of type CustomFormatter not {type(formatter)}."
         )
-    _FORMATTER = formatter
-    return
 
-
-def get_logger() -> logging.Logger:
-    global _FORMATTER
-    if isinstance(_FORMATTER, CustomFormatter):
-        name, level = _FORMATTER.name, _FORMATTER.level
-        logger = logging.getLogger(name)
-        logger.setLevel(level)
-        ch = logging.StreamHandler()
-        ch.setLevel(level)
-        ch.setFormatter(_FORMATTER)
-        logger.addHandler(ch)
-        logger.debug("Logging Configuration Complete!")
-        return logger
-    else:
-        raise ValueError("Formatter has not been set!")
+    logger = logging.getLogger()  # get root logger
+    ch = logging.StreamHandler()
+    ch.setFormatter(
+        formatter
+    )  # HACK: set formatter for root logger. All children of root will use this logger
+    logger.addHandler(ch)
