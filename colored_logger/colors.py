@@ -2,7 +2,7 @@
 
 # NOTE: These are octal color codes are compatible with bash!
 # https://stackoverflow.com/a/28938235
-
+PREFIX = "\033"  # octal color code prefix
 RESET = "\033[0m"  # RESET all color codes with this
 
 # NOTE: Foreground

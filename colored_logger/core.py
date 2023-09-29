@@ -1,8 +1,8 @@
 from __future__ import annotations
 import logging
+import os
+import textwrap
 
-# import colored_logger.colors as colors
-# import colored_logger.symbols as symbols
 from . import colors
 from . import symbols
 
@@ -19,6 +19,7 @@ class CustomFormatter(logging.Formatter):
         logging.ERROR: "RED",
         logging.CRITICAL: "RED",
     }
+    FLAG: str = "-.-"  # NOTE for right alignment
 
     def __init__(
         self,
@@ -30,7 +31,6 @@ class CustomFormatter(logging.Formatter):
         level: str = "WARN",
         msg_length: int = 6,
         msg_hspace: int = 1,
-        num_tabs=10,
         shortend_names: bool = True,
         datefmt: str = "%H:%H:%S",
         **formatter_kwargs,
@@ -41,9 +41,6 @@ class CustomFormatter(logging.Formatter):
         self.msg_hspace = (
             msg_hspace
         )  # how much space between the start cap and log level
-        self.num_tabs = (
-            num_tabs
-        )  # spacing between log level and other things on the level line
         self.name = name
         self.startcap = startcap
         self.endcap = endcap
@@ -56,6 +53,11 @@ class CustomFormatter(logging.Formatter):
         if self.shortend_names:
             self._shorten_names()
         self._print_init()
+        self.term_size = (
+            os.get_terminal_size()
+        )  # NOTE: namedtuple os.terminal_size(columns=190, lines=46)
+        self._count = 0  # a counter for right alignment TODO: need to make it work
+        self._max_width = round(0.60 * self.term_size.columns)  # max term width ratio
 
     def _print_init(self) -> None:
         """Print init with formatter name"""
@@ -95,7 +97,6 @@ class CustomFormatter(logging.Formatter):
             if right:
                 fmt = symbols.ENDCAPS["right-" + self.endcap]
             else:
-                fmt = symbols.ENDCAPS["left-" + self.endcap]
                 fmt = symbols.ENDCAPS[self.startcap]
         elif self.endcap in symbols.ENDCAPS.keys():
             fmt = symbols.ENDCAPS[self.endcap]
@@ -103,17 +104,16 @@ class CustomFormatter(logging.Formatter):
             raise ValueError
         return fmt + " " * self.msg_hspace
 
-    def _get_arrow(self, length=1, right=True, endcap_color="") -> str:
+    def _get_arrow(self, length=1, right=True, endcap_color="", msg="", bg="") -> str:
         connectors = symbols.CONNECTORS[self.connector]
-        fmt = self.connector_color
-        if self.connector_color == colors.RESET:
-            connector = " "
+        if self.connector_color == colors.RESET:  # whitespace for connectors
+            fmt = " " * length
         else:
-            fmt += connectors["vertical-and-right"]
-            connector = connectors["horizontal"]
-        fmt += connector * length
-        fmt += endcap_color + self._get_endcap(right=right)
-        fmt += colors.RESET
+            fmt = self._color_str(
+                connectors["vertical-and-right"] + connectors["horizontal"] * length,
+                self.connector_color,
+            )
+        fmt += self._color_str(self._get_endcap(right=right) + msg, endcap_color, bg=bg)
         return fmt
 
     def _get_color(self, input, bg=False) -> str:
@@ -130,33 +130,52 @@ class CustomFormatter(logging.Formatter):
         else:
             return as_color_code(input, bg)
 
+    def _color_str(self, string: str, fg: str, bg="") -> str:
+        """Function to keep count of offset needed for color padding."""
+        self._count += (
+            len(fg) + len(colors.RESET) + len(bg)
+        )  # size of color code and reset
+        return fg + bg + string + colors.RESET
+
     def _get_format(self, levelno: int) -> str:
         """Get format string for logger with color codes and symbols inserted."""
-        start_cap = self._get_arrow(
-            length=0, right=False, endcap_color=self._get_color(levelno)
-        ) + self._get_color(levelno, bg=levelno == logging.CRITICAL)
-        level_fmt = f"{start_cap}%(levelname)s{colors.RESET}:"
-        white_space = "\t" * self.num_tabs
-        module_fmt = f"{colors.CYAN}%(module)s.%(funcName)s():%(lineno)s{colors.RESET}"
-        time_fmt = f"{colors.WHITE}%(asctime)s{colors.RESET}"
+        self._count = 0
+
+        level_fmt = (
+            self._get_arrow(
+                length=0,
+                right=False,
+                endcap_color=self._get_color(levelno),
+                msg="%(levelname)s",
+                bg=self._get_color(levelno, bg=levelno == logging.CRITICAL),
+            )
+            + ":"
+        )
+        module_fmt = self._color_str(
+            "%(module)s.%(funcName)s():%(lineno)s", colors.CYAN
+        )
+        time_fmt = self._color_str("%(asctime)s ", colors.WHITE)
         connector_fmt = self._get_arrow(
             length=self.msg_length, endcap_color=self._get_color(levelno)
         )
-        message_fmt = f"%(message)s{colors.RESET}"
+        message_fmt = "%(message)s"
         return (
             level_fmt
-            + white_space
+            + self.FLAG
             + time_fmt
-            + " "
             + module_fmt
             + "\n"
             + connector_fmt
+            + self.FLAG
             + message_fmt
         )
 
     def format(self, record):
         log_fmt = self._get_format(record.levelno)
         formatter = logging.Formatter(log_fmt, datefmt=self.datefmt)
+        record.msg = str(record.msg)  # convert types to string
+        if len(record.msg) >= self._max_width and "\n" not in record.msg:
+            record.msg = textwrap.fill(record.msg, self._max_width)
         if "\n" in record.msg:  # insert decorations to message
             msg = ""
             for i, line in enumerate(record.msg.splitlines()):
@@ -171,8 +190,8 @@ class CustomFormatter(logging.Formatter):
                 msg += line
             record.msg = msg
         fmt = formatter.format(record)
-        # if "<module>()" in fmt:  # remove <module>
-        #     fmt = fmt.replace(".<module>()", "")
+        head, body, tail = fmt.split(self.FLAG)
+        fmt = head + " " * (self.term_size.columns - self._count) + body + tail
         return fmt
 
 
