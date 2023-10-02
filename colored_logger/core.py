@@ -154,7 +154,7 @@ class CustomFormatter(logging.Formatter):
         module_fmt = self._color_str(
             "%(module)s.%(funcName)s():%(lineno)s", colors.CYAN
         )
-        time_fmt = self._color_str("%(asctime)s ", colors.WHITE)
+        time_fmt = self._color_str("%(asctime)s", colors.WHITE)
         connector_fmt = self._get_arrow(
             length=self.msg_length, endcap_color=self._get_color(levelno)
         )
@@ -162,8 +162,9 @@ class CustomFormatter(logging.Formatter):
         return (
             level_fmt
             + self.FLAG
-            + time_fmt
             + module_fmt
+            + " "
+            + time_fmt
             + "\n"
             + connector_fmt
             + self.FLAG
@@ -195,7 +196,7 @@ class CustomFormatter(logging.Formatter):
         return fmt
 
 
-def set_formatter(formatter: CustomFormatter) -> None:
+def set_formatter(formatter: CustomFormatter, level) -> None:
     if not isinstance(formatter, CustomFormatter):
         raise TypeError(
             f"Formatter must be of type CustomFormatter not {type(formatter)}."
@@ -207,3 +208,4 @@ def set_formatter(formatter: CustomFormatter) -> None:
         formatter
     )  # HACK: set formatter for root logger. All children of root will use this logger
     logger.addHandler(ch)
+    logger.setLevel(level)
